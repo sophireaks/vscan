@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """vscan — terminal vulnerability scanner."""
 
 import logging
@@ -36,7 +36,7 @@ _BANNER = """
 """
 
 _SCANNER_CHOICES = frozenset(
-    {"xss", "sqli", "headers", "files", "paths", "cookies", "bac", "cors", "ssl"}
+    {"xss", "sqli", "headers", "files", "paths", "cookies", "bac", "cors", "ssl", "login_bypass"}
 )
 
 _SCANNER_META = [
@@ -49,6 +49,7 @@ _SCANNER_META = [
     ("bac",     "Broken access control",              "CWE-284"),
     ("cors",    "CORS misconfiguration",              "CWE-942"),
     ("ssl",     "SSL/TLS configuration issues",       "CWE-295"),
+    ("login_bypass", "Login bypass",                   "CWE-918"),
 ]
 
 
@@ -193,6 +194,7 @@ def _execute_scan(target, profile=None, fmt="table", output=None,
         "run_bac_scan":    "bac"     in enabled,
         "run_cors_scan":   "cors"    in enabled,
         "run_ssl_scan":    "ssl"     in enabled,
+        "run_login_bypass_scan": "login_bypass"     in enabled,
         "crawl": crawl,
         "timeout": timeout,
         "threads": threads,
@@ -275,8 +277,6 @@ def _interactive() -> None:
             console.print("\n  [bold cyan]Goodbye![/bold cyan]\n")
             break
 
-
-# ── Entry point ───────────────────────────────────────────────────────────────
 
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.version_option("2.0.0", "-V", "--version", prog_name="vscan")

@@ -16,6 +16,7 @@ from vulnerabilities.path_exposure_scanner import scan_path_exposure
 from vulnerabilities.cookie_scanner import scan_cookies
 from vulnerabilities.cors_scanner import scan_cors
 from vulnerabilities.ssl_scanner import scan_ssl
+from vulnerabilities.login_bypass_scanner import scan_login_bypass 
 
 log = logging.getLogger(__name__)
 
@@ -95,7 +96,6 @@ def run_scan(target_url: str, scan_config: dict, console=None) -> list[dict]:
         else:
             log.info(msg)
 
-    # --- Per-target scanners ---
     _status("[headers] Checking security headers...")
     if scan_config.get("run_header_scan"):
         result = check_security_headers(target_url)
@@ -131,8 +131,13 @@ def run_scan(target_url: str, scan_config: dict, console=None) -> list[dict]:
         result = scan_broken_access_control(target_url, timeout)
         if result:
             all_findings.append(result)
+            
+    _status("[login] Testing login bypass...")
+    if scan_config.get("run_login_bypass_scan"):
+        result = scan_login_bypass(target_url, timeout)
+        if result:
+            all_findings.append(result)
 
-    # --- Link discovery ---
     use_selenium = scan_config.get("crawl", False)
     _status(f"[discovery] {'Selenium' if use_selenium else 'requests'}-based link discovery...")
     discovered = get_links(target_url, scan_config, use_selenium)
@@ -140,7 +145,6 @@ def run_scan(target_url: str, scan_config: dict, console=None) -> list[dict]:
         discovered.append(target_url)
     _status(f"[discovery] Found {len(discovered)} link(s).")
 
-    # --- Per-link scanning with progress bar ---
     threads = scan_config.get("threads", 5)
 
     if console:
