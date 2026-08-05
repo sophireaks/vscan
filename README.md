@@ -103,7 +103,7 @@ A modular, **CLI-first** web vulnerability scanner written in Python. Built to p
 ### Installation
 
 ```bash
-git clone https://github.com/sophireaks/vscan.git
+git clone https://github.com/sophireaks/vscan
 cd vscan
 
 python -m venv .venv
